@@ -1,0 +1,22 @@
+Add toggle Notification button
+    when in inventory page, you can toggle
+
+
+when fetching the ai recipes, make sure to fetch image api for wach one also!
+
+
+TODOS:
+    Make the Inventory/Recipe work, image is not showing
+
+
+IDEAS:
+    make ai fill out the new schedules info for ya
+    make a calendar lol.
+
+    Unrelated:
+        make a rust project aout SAFE key logging, to show stats on which keys.
+        but must prove that this program is not malicious and does not block other key inputs.
+        - just an idea.
+
+        make a gui app that SYNCS NOTES ACROSS platforms, can be on web for ios.
+        will use special algos like git to send changes
