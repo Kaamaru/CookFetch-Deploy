@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ChevronLeft, ChevronRight, AlertTriangle, Clock } from "lucide-react";
+import { ChevronLeft, ChevronRight, Clock } from "lucide-react";
 import { useGlobalContext } from "@/contexts/GlobalContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -33,59 +33,16 @@ const Calendar = () => {
   const { currentUser } = useAuth();
   const { t } = useLanguage();
   const router = useRouter();
-  const { demoFoods } = useGlobalContext();
+  const { demoFoods, household } = useGlobalContext();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [foods, setFoods] = useState<FoodItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
   const [expandedFood, setExpandedFood] = useState<FoodItem | null>(null);
+  const [inventoryMode, setInventoryMode] = useState<"personal" | "household">("personal");
   const isDemo = !currentUser;
+  const initializedUserRef = useRef<string | null>(null);
 
-  // Load foods from storage or use demo foods
-  useEffect(() => {
-    if (isDemo) {
-      setFoods(demoFoods);
-    } else if (currentUser?.uid) {
-      // Check localStorage for cached foods
-      const cacheKey = `foods_${currentUser.uid}`;
-      const cachedFoods = localStorage.getItem(cacheKey);
-
-      if (cachedFoods) {
-        try {
-          setFoods(JSON.parse(cachedFoods));
-        } catch (error) {
-          console.error("Error parsing cached foods:", error);
-        }
-      }
-    }
-  }, [currentUser?.uid, isDemo, demoFoods]);
-
-  // Get days in month
-  const getDaysInMonth = (date: Date) => {
-    return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
-  };
-
-  // Get first day of month (0 = Sunday, 1 = Monday, etc.)
-  const getFirstDayOfMonth = (date: Date) => {
-    return new Date(date.getFullYear(), date.getMonth(), 1).getDay();
-  };
-
-  // Get foods for a specific date
-  const getFoodsForDate = (day: number) => {
-    // Format the date as YYYY-MM-DD in local timezone
-    const date = new Date(
-      currentDate.getFullYear(),
-      currentDate.getMonth(),
-      day,
-    );
-    const dateStr = `${date.getFullYear()}-${String(
-      date.getMonth() + 1,
-    ).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-
-    return foods.filter((food) => food.expiryDate === dateStr);
-  };
-
-  // Calculate days until expiry (already calculated in food item, but this is a fallback)
   const calculateDaysUntilExpiry = (expiryDate?: string): number | null => {
     if (!expiryDate) return null;
 
@@ -97,6 +54,118 @@ const Calendar = () => {
 
     const diff = expiry.getTime() - today.getTime();
     return Math.ceil(diff / (1000 * 60 * 60 * 24));
+  };
+
+  const readCachedFoods = useCallback(() => {
+    if (!currentUser?.uid) return [];
+
+    const cacheKeys =
+      inventoryMode === "household"
+        ? household?.household_id
+          ? [
+              `foods_${currentUser.uid}_household_${household.household_id}`,
+              `foods_${currentUser.uid}_household`,
+              `foods_${currentUser.uid}`,
+            ]
+          : [`foods_${currentUser.uid}_household`, `foods_${currentUser.uid}`]
+        : [`foods_${currentUser.uid}_personal`, `foods_${currentUser.uid}`];
+
+    const cachedFoods: FoodItem[] = [];
+
+    for (const cacheKey of cacheKeys) {
+      const cachedValue = localStorage.getItem(cacheKey);
+      if (!cachedValue) continue;
+
+      try {
+        const parsed = JSON.parse(cachedValue);
+        if (Array.isArray(parsed)) {
+          cachedFoods.push(...parsed);
+        }
+      } catch (error) {
+        console.error("Error parsing cached foods:", error);
+      }
+    }
+
+    const uniqueFoods = new Map<string, FoodItem>();
+
+    for (const food of cachedFoods) {
+      const key = food.id ?? `${food.name}-${food.expiryDate}-${food.purchaseDate ?? ""}`;
+      if (!uniqueFoods.has(key)) {
+        uniqueFoods.set(key, food);
+      }
+    }
+
+    return Array.from(uniqueFoods.values());
+  }, [currentUser?.uid, inventoryMode, household?.household_id]);
+
+  useEffect(() => {
+    if (isDemo) {
+      setFoods(demoFoods);
+      setIsLoading(false);
+      return;
+    }
+
+    if (!currentUser?.uid) {
+      setFoods([]);
+      setIsLoading(false);
+      return;
+    }
+
+    if (initializedUserRef.current !== currentUser.uid) {
+      initializedUserRef.current = currentUser.uid;
+
+      const savedMode = localStorage.getItem(
+        `calendar_inventory_mode_${currentUser.uid}`,
+      );
+
+      if (savedMode === "personal" || savedMode === "household") {
+        setInventoryMode((previousMode) =>
+          previousMode === savedMode ? previousMode : savedMode,
+        );
+      } else {
+        const nextMode = household?.household_id ? "household" : "personal";
+        setInventoryMode((previousMode) =>
+          previousMode === nextMode ? previousMode : nextMode,
+        );
+      }
+    }
+
+    setIsLoading(true);
+    const cachedFoods = readCachedFoods();
+    setFoods(cachedFoods);
+    setIsLoading(false);
+
+  }, [currentUser?.uid, demoFoods, household?.household_id, isDemo, readCachedFoods]);
+
+  useEffect(() => {
+    if (!currentUser?.uid || isDemo) return;
+
+    localStorage.setItem(
+      `calendar_inventory_mode_${currentUser.uid}`,
+      inventoryMode,
+    );
+    setFoods(readCachedFoods());
+  }, [currentUser?.uid, inventoryMode, isDemo, readCachedFoods]);
+
+  const getDaysInMonth = (date: Date) => {
+    return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+  };
+
+  const getFirstDayOfMonth = (date: Date) => {
+    return new Date(date.getFullYear(), date.getMonth(), 1).getDay();
+  };
+
+  const getFoodsForDate = (day: number) => {
+    const date = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth(),
+      day,
+    );
+    const dateStr = `${date.getFullYear()}-${String(
+      date.getMonth() + 1,
+    ).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+
+    return foods.filter((food) => food.expiryDate === dateStr);
   };
 
   // Get status color
@@ -160,10 +229,37 @@ const Calendar = () => {
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="mb-8 animate-fade-in">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              {t("expiryCalendar")}
-            </h1>
-            <p className="text-gray-600">{t("expiryCalendarDescription")}</p>
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                  {t("expiryCalendar")}
+                </h1>
+                <p className="text-gray-600">{t("expiryCalendarDescription")}</p>
+              </div>
+
+              {!isDemo && (
+                <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-red-200 bg-white p-2 shadow-sm">
+                  <Button
+                    variant={inventoryMode === "personal" ? "default" : "ghost"}
+                    size="sm"
+                    onClick={() => setInventoryMode("personal")}
+                    className={inventoryMode === "personal" ? "bg-red-600 text-white hover:bg-red-700" : "text-gray-700"}
+                  >
+                    {t("myInventory")}
+                  </Button>
+                  {household?.household_id && (
+                    <Button
+                      variant={inventoryMode === "household" ? "default" : "ghost"}
+                      size="sm"
+                      onClick={() => setInventoryMode("household")}
+                      className={inventoryMode === "household" ? "bg-red-600 text-white hover:bg-red-700" : "text-gray-700"}
+                    >
+                      {household.name || t("household")}
+                    </Button>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Calendar Controls */}

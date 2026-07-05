@@ -378,7 +378,10 @@ const Foods = () => {
 
           // Cache foods for Calendar to use
           try {
-            const cacheKey = `foods_${currentUser.uid}_${inventoryMode}`;
+            const cacheKey =
+              inventoryMode === "household" && household?.household_id
+                ? `foods_${currentUser.uid}_household_${household.household_id}`
+                : `foods_${currentUser.uid}_${inventoryMode}`;
             localStorage.setItem(cacheKey, JSON.stringify(allFoods));
           } catch (e) {
             console.warn("Failed to cache foods", e);
@@ -1412,13 +1415,13 @@ const Foods = () => {
         location: newFood.location?.trim() || undefined,
       };
 
-      console.log("🍎 DEBUG - Sending payload to API:", {
-        expiryMode: newFood.expiryMode,
-        calculatedExpiryDateStr: expiryDateStr,
-        payloadExpiry: payload.expiry,
-        payload: payload,
-        mode: inventoryMode,
-      });
+      // console.log("🍎 DEBUG - Sending payload to API:", {
+      //   expiryMode: newFood.expiryMode,
+      //   calculatedExpiryDateStr: expiryDateStr,
+      //   payloadExpiry: payload.expiry,
+      //   payload: payload,
+      //   mode: inventoryMode,
+      // });
 
       let data;
       if (inventoryMode === "household" && household) {
@@ -1435,7 +1438,7 @@ const Foods = () => {
           location: payload.location,
         });
       }
-      console.log("🍎 Food added successfully:", data);
+      // console.log("🍎 Food added successfully:", data);
 
       // Create new schedule object to add to cache using the API response data
       const newSchedule: Schedule = {
