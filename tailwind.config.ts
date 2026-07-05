@@ -154,6 +154,14 @@ export default {
             transform: "translateY(-3px)",
           },
         },
+        "scan-laser": {
+          "0%, 100%": {
+            transform: "translateY(0)",
+          },
+          "50%": {
+            transform: "translateY(190px)",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -164,6 +172,7 @@ export default {
         "fade-in": "fade-in 420ms cubic-bezier(0.16, 1, 0.3, 1)",
         "slide-up": "slide-up 480ms cubic-bezier(0.16, 1, 0.3, 1)",
         "bounce-gentle": "bounce-gentle 2s infinite",
+        "scan-laser": "scan-laser 2s ease-in-out infinite",
       },
     },
   },

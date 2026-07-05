@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, LogOut, Trash2, QrCode, Camera } from "lucide-react";
 import QRCode from "qrcode";
@@ -33,6 +34,11 @@ export const HouseholdSection = () => {
   const [scanError, setScanError] = useState("");
   const [scanInputKey, setScanInputKey] = useState(0);
   const scanInputRef = useRef<HTMLInputElement>(null);
+  const [scanMode, setScanMode] = useState<"camera" | "image">("camera");
+  const [videoElement, setVideoElement] = useState<HTMLVideoElement | null>(null);
+  const isSubmittingRef = useRef(false);
+  const [isValidating, setIsValidating] = useState(false);
+  const [scannedCode, setScannedCode] = useState("");
 
   const submitInviteCode = useCallback(
     async (rawInviteCode: string) => {
@@ -46,6 +52,8 @@ export const HouseholdSection = () => {
           setInviteCode(normalizedCode);
           toast({ title: t("success"), description: t("welcomeLoginDescription") });
           await loadHousehold(currentUser.uid);
+        } else {
+          throw new Error((res as any).message || "Invalid invite code or failed to join household.");
         }
       } catch (error: unknown) {
         const message = error instanceof Error ? error.message : t("networkError");
@@ -166,6 +174,88 @@ export const HouseholdSection = () => {
       active = false;
     };
   }, [qrModalOpen, generatedCode]);
+
+  useEffect(() => {
+    let active = true;
+    let controls: { stop: () => void } | null = null;
+    isSubmittingRef.current = false;
+
+    const startCamera = async () => {
+      if (!scanDialogOpen || scanMode !== "camera" || !videoElement) return;
+
+      setScanError("");
+      setScanStatus("Initializing camera...");
+
+      try {
+        const reader = new BrowserQRCodeReader();
+        controls = await reader.decodeFromConstraints(
+          {
+            video: {
+              facingMode: { ideal: "environment" }
+            }
+          },
+          videoElement,
+          (result, error, ctrl) => {
+            if (!active) return;
+
+            if (result) {
+              const decodedText = result.getText().trim().toUpperCase();
+              if (isSubmittingRef.current) return;
+              isSubmittingRef.current = true;
+              setScannedCode(decodedText);
+              setIsValidating(true);
+
+              setScanStatus("QR code found. Joining household...");
+
+              submitInviteCode(decodedText)
+                .then(() => {
+                  ctrl.stop();
+                  setScanDialogOpen(false);
+                  setScanStatus("");
+                  setIsValidating(false);
+                })
+                .catch((err: unknown) => {
+                  const message = err instanceof Error ? err.message : "Failed to join household.";
+                  setScanError(message);
+                  setScanStatus("Ready to scan.");
+                  setIsValidating(false);
+                  // Reset submitting status after a 3-second delay to allow scanning again
+                  setTimeout(() => {
+                    isSubmittingRef.current = false;
+                  }, 3000);
+                });
+            }
+          }
+        );
+
+        if (!active) {
+          controls.stop();
+          controls = null;
+        } else {
+          setScanStatus("Camera active. Point at a QR code.");
+        }
+      } catch (err: unknown) {
+        console.error("Camera access error:", err);
+        if (active) {
+          const isNotSupported = !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia;
+          const message = isNotSupported
+            ? "Camera scanning is not supported in this browser or context (requires HTTPS)."
+            : (err instanceof Error ? err.message : "Could not access camera.");
+          setScanError(`${message} Please try uploading an image instead.`);
+          setScanStatus("");
+        }
+      }
+    };
+
+    void startCamera();
+
+    return () => {
+      active = false;
+      if (controls) {
+        controls.stop();
+      }
+    };
+  }, [scanDialogOpen, scanMode, videoElement, submitInviteCode]);
 
   const handleScanImageClick = () => {
     setScanError("");
@@ -289,7 +379,7 @@ export const HouseholdSection = () => {
                 </Button>
                 <Button type="button" variant="secondary" className="w-full" onClick={() => setScanDialogOpen(true)}>
                   <QrCode className="mr-2 h-4 w-4" />
-                  Scan QR from image
+                  Scan QR Code
                 </Button>
               </form>
             </CardContent>
@@ -305,8 +395,12 @@ export const HouseholdSection = () => {
               </CardDescription>
             </div>
             {household.is_host ? (
-              <Button onClick={handleGenerateInvite} className="bg-red-600 hover:bg-red-700">
-                <QrCode className="mr-2 h-4 w-4" />
+              <Button onClick={handleGenerateInvite} className="bg-red-600 hover:bg-red-700" disabled={isLoading}>
+                {isLoading ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <QrCode className="mr-2 h-4 w-4" />
+                )}
                 {t("generateQR")}
               </Button>
             ) : (
@@ -392,38 +486,92 @@ export const HouseholdSection = () => {
           if (!open) {
             setScanStatus("");
             setScanError("");
+            setIsValidating(false);
+            setScannedCode("");
+          } else {
+            setScanMode("camera");
           }
         }}
       >
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle className="text-center text-xl">Scan QR from image</DialogTitle>
+            <DialogTitle className="text-center text-xl">Scan QR Code</DialogTitle>
             <DialogDescription className="text-center">
-              Upload a screenshot or photo of the household QR code. No camera permission is needed.
+              Scan the household invite QR code to join instantly.
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-red-200 bg-red-50/40 p-6 text-center">
-              <Camera className="h-10 w-10 text-red-500" />
-              <p className="text-sm text-gray-700">
-                Choose a QR image from your device and we will decode it immediately.
-              </p>
-              <Button type="button" onClick={handleScanImageClick} disabled={isLoading} className="bg-red-600 hover:bg-red-700">
-                <QrCode className="mr-2 h-4 w-4" />
-                Pick QR image
-              </Button>
-              <input
-                key={scanInputKey}
-                ref={scanInputRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleScanImageChange}
-              />
-            </div>
+
+          <Tabs value={scanMode} onValueChange={(val) => setScanMode(val as "camera" | "image")} className="w-full">
+            <TabsList className="grid w-full grid-cols-2 mb-4">
+              <TabsTrigger value="camera">Use Camera</TabsTrigger>
+              <TabsTrigger value="image">Upload Image</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="camera" className="space-y-4">
+              <div className="relative overflow-hidden rounded-2xl bg-black aspect-video flex items-center justify-center border border-red-100 shadow-inner">
+                <video
+                  ref={setVideoElement}
+                  className="h-full w-full object-cover"
+                  playsInline
+                  muted
+                />
+                {isValidating ? (
+                  <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center space-y-3 transition-opacity duration-300">
+                    <div className="rounded-full bg-green-500/20 p-3 border border-green-500 animate-pulse">
+                      <QrCode className="h-8 w-8 text-green-400" />
+                    </div>
+                    <p className="text-white font-medium text-sm">QR Code Detected</p>
+                    {scannedCode && (
+                      <span className="bg-white/15 text-white text-xs px-2.5 py-1 rounded font-mono tracking-wider">
+                        {scannedCode}
+                      </span>
+                    )}
+                    <div className="flex items-center gap-2 text-gray-300 text-xs">
+                      <Loader2 className="h-3 w-3 animate-spin text-red-500" />
+                      <span>Joining household...</span>
+                    </div>
+                  </div>
+                ) : !scanError ? (
+                  <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+                    <div className="border-2 border-red-500/80 w-44 h-44 rounded-xl relative">
+                      <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-red-500 -mt-[2px] -ml-[2px]" />
+                      <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-red-500 -mt-[2px] -mr-[2px]" />
+                      <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-red-500 -mb-[2px] -ml-[2px]" />
+                      <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-red-500 -mb-[2px] -mr-[2px]" />
+                      <div className="absolute left-0 right-0 top-0 h-[2px] bg-red-500/80 shadow-[0_0_8px_rgba(239,68,68,0.8)] animate-scan-laser" />
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="image" className="space-y-4">
+              <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-red-200 bg-red-50/40 p-6 text-center">
+                <Camera className="h-10 w-10 text-red-500" />
+                <p className="text-sm text-gray-700">
+                  Choose a QR image from your device and we will decode it immediately.
+                </p>
+                <Button type="button" onClick={handleScanImageClick} disabled={isLoading} className="bg-red-600 hover:bg-red-700">
+                  <QrCode className="mr-2 h-4 w-4" />
+                  Pick QR image
+                </Button>
+                <input
+                  key={scanInputKey}
+                  ref={scanInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleScanImageChange}
+                />
+              </div>
+            </TabsContent>
+          </Tabs>
+
+          <div className="space-y-2 min-h-[1.5rem]">
             {scanStatus && <p className="text-center text-sm text-muted-foreground">{scanStatus}</p>}
-            {scanError && <p className="text-center text-sm text-red-600">{scanError}</p>}
+            {scanError && <p className="text-center text-sm text-red-600 font-medium px-4">{scanError}</p>}
           </div>
+
           <DialogFooter className="sm:justify-center">
             <Button type="button" variant="secondary" onClick={() => setScanDialogOpen(false)}>
               {t("close")}
