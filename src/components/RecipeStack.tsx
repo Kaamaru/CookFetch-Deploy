@@ -123,6 +123,7 @@ export default function RecipeStack({
                     🍽️
                   </div>
                 )}
+                <h2>sigma</h2>
                 {onDelete ? (
                   <Button
                     variant="destructive"

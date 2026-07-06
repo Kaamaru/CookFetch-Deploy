@@ -1506,6 +1506,9 @@ const Foods = () => {
       console.warn("Unable to normalize recipe for preview", rawDish);
       return;
     }
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("selected-recipe", JSON.stringify(normalized));
+    }
     // navigate to recipe page with normalized shape
     router.push("/recipe");
   };
@@ -1679,10 +1682,12 @@ const Foods = () => {
                         <SelectItem value="ingredients">
                           {t("myFoods")}
                         </SelectItem>
-                        <SelectItem value="recipes">{t("recipes")}</SelectItem>
-                        <SelectItem value="classify">
+                        <SelectItem value="recipes">
+                          {t("recipes")}
+                          </SelectItem>
+                        {/* <SelectItem value="classify">
                           {t("classifyImageTab")}
-                        </SelectItem>
+                        </SelectItem> */}
                         <SelectItem value="notifications">
                           {t("notifications")}
                         </SelectItem>

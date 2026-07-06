@@ -1033,6 +1033,9 @@ const Chatbot = () => {
   };
 
   const handleViewFull = (dish: Dish) => {
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("selected-recipe", JSON.stringify(dish));
+    }
     // navigate to recipe page and pass dish in location state
     router.push("/recipe");
   };

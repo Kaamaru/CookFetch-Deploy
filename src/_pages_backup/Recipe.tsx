@@ -15,11 +15,32 @@ const RecipePage = () => {
   const router = useRouter();
   const { currentUser } = useAuth();
   const { t } = useLanguage();
-  // Note: Next.js router doesn't support passing state like React Router.
-  // For now, dish is undefined - you can pass recipe via query params if needed.
-  const dish = undefined;
+  const [dish, setDish] = React.useState<Dish | undefined>(undefined);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      const cached = sessionStorage.getItem("selected-recipe");
+      if (cached) {
+        try {
+          setDish(JSON.parse(cached));
+        } catch (e) {
+          console.error("Failed to parse selected recipe from sessionStorage", e);
+        }
+      }
+      setLoading(false);
+    }
+  }, []);
 
   console.log("RecipePage - currentUser:", currentUser);
+
+  if (loading) {
+    return (
+      <div className="p-6 flex items-center justify-center min-h-[50vh]">
+        <div className="text-gray-500">{t("loading")}</div>
+      </div>
+    );
+  }
 
   if (!currentUser) {
     return (
