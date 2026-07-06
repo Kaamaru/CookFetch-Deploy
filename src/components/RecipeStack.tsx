@@ -98,7 +98,7 @@ export default function RecipeStack({
             key={id}
             role="listitem"
             aria-label={`Recipe card ${title}`}
-            className="w-full rounded-2xl overflow-hidden bg-white shadow-sm transform transition duration-200 ease-in-out hover:shadow-lg hover:scale-105"
+            className="w-full rounded-2xl overflow-hidden bg-white shadow-sm transform transition duration-200 ease-in-out hover:shadow-lg hover:scale-105 relative"
             style={{ transformOrigin: "center top" }}
           >
             <button
@@ -107,7 +107,7 @@ export default function RecipeStack({
               aria-label={`Preview ${title}`}
               className="text-left w-full h-full p-4 flex flex-col items-start gap-3 focus:outline-none"
             >
-              {/* Image + delete action */}
+              {/* Image */}
               <div className="w-full relative">
                 {dish.image ? (
                   <img
@@ -124,22 +124,6 @@ export default function RecipeStack({
                   </div>
                 )}
                 <h2>sigma</h2>
-                {onDelete ? (
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    className="absolute top-2 right-2 px-4 py-2"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onDelete?.(dish);
-                    }}
-                    disabled={!recipeId || deletingId === recipeId}
-                  >
-                    {deletingId === recipeId
-                      ? t("deleting")
-                      : t("deleteRecipe")}
-                  </Button>
-                ) : null}
               </div>
               <div className="w-full flex items-center justify-between gap-4">
                 <h3 className="text-lg font-semibold text-gray-800 truncate">
@@ -150,6 +134,22 @@ export default function RecipeStack({
                 </time>
               </div>
             </button>
+            {onDelete ? (
+              <Button
+                variant="destructive"
+                size="sm"
+                className="absolute top-6 right-6 px-4 py-2 z-10"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete?.(dish);
+                }}
+                disabled={!recipeId || deletingId === recipeId}
+              >
+                {deletingId === recipeId
+                  ? t("deleting")
+                  : t("deleteRecipe")}
+              </Button>
+            ) : null}
           </div>
         );
       })}

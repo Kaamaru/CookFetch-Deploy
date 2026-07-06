@@ -258,6 +258,7 @@ const Index = () => {
                     fill
                     sizes="(max-width: 1024px) 0px, 66vw"
                     className="w-full h-full object-cover"
+                    unoptimized
                   />
                 </div>
               </div>
@@ -275,6 +276,7 @@ const Index = () => {
                   fill
                   sizes="100vw"
                   className="w-full h-full object-cover"
+                  unoptimized
                 />
               </div>
             </div>
