@@ -31,6 +31,7 @@ export const API_ENDPOINTS = {
   deleteSchedule: (uid: string, scheduleId: string) => `${API_BASE_URL}/delete/schedules/${uid}/${scheduleId}`,
   notifyOn: (uid: string, scheduleId: string) => `${API_BASE_URL}/notify/on/${uid}/${scheduleId}`,
   notifyOff: (uid: string, scheduleId: string) => `${API_BASE_URL}/notify/off/${uid}/${scheduleId}`,
+  testNotification: (uid: string) => `${API_BASE_URL}/notify/test/${uid}`,
   
   // Chat
   chat: (uid: string) => `${API_BASE_URL}/chat`,

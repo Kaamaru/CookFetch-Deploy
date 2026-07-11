@@ -42,6 +42,7 @@ import {
   ArrowLeft,
   User,
   Users,
+  Send,
 } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import { useAuth } from "@/contexts/AuthContext";
@@ -52,6 +53,7 @@ import { normalizeDish } from "@/lib/recipeUtils";
 import { apiClient } from "@/lib/apiClient";
 import { API_DEBUG } from "@/lib/config";
 import { getCategoryIcon } from "@/lib/foodCategories";
+import { useToast } from "@/hooks/use-toast";
 import ImageClassifier from "@/components/ImageClassifier";
 import BatchScan from "@/components/BatchScan";
 import LineLinkSection from "@/components/LineLinkSection";
@@ -196,6 +198,8 @@ const Foods = () => {
   const [notificationsCount, setNotificationsCount] = useState<number | null>(
     null,
   );
+  const [isSendingTest, setIsSendingTest] = useState(false);
+  const { toast } = useToast();
   const [recipeSearchTerm, setRecipeSearchTerm] = useState("");
   const [notifSearchTerm, setNotifSearchTerm] = useState("");
   const [deletingRecipeId, setDeletingRecipeId] = useState<string | null>(null);
@@ -420,6 +424,44 @@ const Foods = () => {
   useEffect(() => {
     ReloadSchedules();
   }, [inventoryMode]);
+
+  const handleSendTestNotification = async () => {
+    if (isDemo || !currentUser?.uid) {
+      setNotifyError(t("noUserLoggedIn"));
+      return;
+    }
+    setIsSendingTest(true);
+    setNotifyError(null);
+    try {
+      const res = await apiClient.sendTestNotification(currentUser.uid);
+      if (!res.any_channel) {
+        toast({
+          title: t("testNotificationNoChannel"),
+          description: t("testNotificationNoChannelDesc"),
+          variant: "destructive",
+        });
+      } else {
+        const channels = [
+          res.email?.attempted ? "Email" : null,
+          res.line?.attempted ? "LINE" : null,
+        ]
+          .filter(Boolean)
+          .join(" + ");
+        toast({
+          title: t("testNotificationSent"),
+          description: t("testNotificationSentDesc", { channels }),
+        });
+      }
+    } catch (e: any) {
+      toast({
+        title: t("testNotificationFailed"),
+        description: e?.message || t("unknownError"),
+        variant: "destructive",
+      });
+    } finally {
+      setIsSendingTest(false);
+    }
+  };
 
   const LoadNotifications = async () => {
     setIsLoadingNotifications(true);
@@ -1044,8 +1086,29 @@ const Foods = () => {
     return sortOrder === "asc" ? cmp : -cmp;
   });
 
+  // Items expiring within this many days auto-surface in the Notifications tab,
+  // even if their notification bell hasn't been switched on.
+  const EXPIRY_ALERT_DAYS = 3;
+
+  // Notifications view = bell-enabled items (from backend) UNION items that are
+  // expiring soon / already expired (from the inventory), de-duplicated by id.
+  const notificationSource: FoodItem[] = (() => {
+    const byId = new Map<string, FoodItem>();
+    notifiedFoods.forEach((f) => {
+      const key = f.id ?? f.name;
+      byId.set(key, f);
+    });
+    foods.forEach((f) => {
+      const key = f.id ?? f.name;
+      if (!byId.has(key) && f.daysUntilExpiry <= EXPIRY_ALERT_DAYS) {
+        byId.set(key, f);
+      }
+    });
+    return Array.from(byId.values());
+  })();
+
   // Notifications view: name-only search and ascending sort by name
-  const notifiedFiltered = [...notifiedFoods]
+  const notifiedFiltered = [...notificationSource]
     .filter((f) => {
       const term = notifSearchTerm.trim().toLowerCase();
       if (!term) return true;
@@ -2302,6 +2365,26 @@ const Foods = () => {
                 {/* LINE notifications account linking */}
                 <LineLinkSection />
 
+                {/* Send a test notification immediately (email + LINE) */}
+                <div className="mb-6 flex flex-col sm:flex-row sm:items-center gap-3 rounded-2xl border border-red-100 bg-white p-4 shadow-sm">
+                  <div className="flex-1">
+                    <p className="font-semibold text-gray-800">
+                      {t("testNotificationTitle")}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      {t("testNotificationHint")}
+                    </p>
+                  </div>
+                  <Button
+                    onClick={handleSendTestNotification}
+                    disabled={isSendingTest || isDemo}
+                    className="bg-red-600 hover:bg-red-700 text-white rounded-xl shrink-0"
+                  >
+                    <Send className="w-4 h-4 mr-2" />
+                    {isSendingTest ? t("sending") : t("sendTestNotification")}
+                  </Button>
+                </div>
+
                 {notifyError && (
                   <div className="mb-4 text-red-600">{notifyError}</div>
                 )}
@@ -2320,7 +2403,7 @@ const Foods = () => {
                     <Badge className="bg-red-100 text-red-700">
                       {t("showingCountOfCount", {
                         shown: notifiedFiltered.length,
-                        total: notificationsCount ?? notifiedFiltered.length,
+                        total: notificationSource.length,
                       })}
                     </Badge>
                   </div>
@@ -2345,9 +2428,15 @@ const Foods = () => {
                                   : (food.notify ?? true);
                               return (
                                 <div className="flex items-center gap-2">
-                                  <Badge className="bg-green-100 text-green-700">
-                                    {t("notifyAll")}
-                                  </Badge>
+                                  {notifyState ? (
+                                    <Badge className="bg-green-100 text-green-700">
+                                      {t("notificationsEnabled")}
+                                    </Badge>
+                                  ) : (
+                                    <Badge className="bg-amber-100 text-amber-700">
+                                      {t("expiringSoon")}
+                                    </Badge>
+                                  )}
                                   <Button
                                     size="sm"
                                     variant="ghost"

@@ -209,6 +209,15 @@ export type LineStatusResponse = {
   linked: boolean;
 };
 
+export type TestNotificationResponse = {
+  success: boolean;
+  item_count: number;
+  used_test_item: boolean;
+  any_channel: boolean;
+  email: { attempted: boolean; to?: string; reason?: string };
+  line: { attempted: boolean; ok?: boolean; error?: string; reason?: string };
+};
+
 export type CreateListFromInfoResponse = {
   status: "success" | "failed";
   message: string;
@@ -565,6 +574,11 @@ export const apiClient = {
   notifyOff(uid: string, scheduleId: string) {
     return apiRequest<GenericApiResponse>(API_ENDPOINTS.notifyOff(uid, scheduleId), {
       method: "PATCH",
+    });
+  },
+  sendTestNotification(uid: string) {
+    return apiRequest<TestNotificationResponse>(API_ENDPOINTS.testNotification(uid), {
+      method: "POST",
     });
   },
   getNotifications(uid: string) {

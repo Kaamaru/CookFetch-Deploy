@@ -5,6 +5,7 @@ import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "next-themes";
 import { Toaster } from "@/components/ui/sonner";
+import { Toaster as RadixToaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { GlobalProvider } from "@/contexts/GlobalContext";
@@ -29,6 +30,7 @@ export default function AppProviders({ children }: AppProvidersProps) {
               <PageTransition>{children}</PageTransition>
               <Footer />
               <Toaster />
+              <RadixToaster />
             </GlobalProvider>
           </AuthProvider>
         </LanguageProvider>

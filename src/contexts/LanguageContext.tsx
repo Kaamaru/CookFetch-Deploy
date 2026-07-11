@@ -360,6 +360,18 @@ const translations = {
     householdJoining: "Joining household...",
     householdInviteQrAlt: "Invite QR code",
     locationPlaceholder: "Pantry / Fridge / Freezer",
+    // Test notification
+    testNotificationTitle: "Test notifications",
+    testNotificationHint:
+      "Send yourself a notification right now through every channel you've set up (email / LINE).",
+    sendTestNotification: "Send test",
+    sending: "Sending…",
+    testNotificationSent: "Test notification sent",
+    testNotificationSentDesc: "Sent via {{channels}} — check your inbox / LINE.",
+    testNotificationFailed: "Couldn't send the test notification",
+    testNotificationNoChannel: "No notification channel set up",
+    testNotificationNoChannelDesc:
+      "Add an email to your account or link LINE first, then try again.",
     // LINE account linking
     lineNotificationsTitle: "LINE notifications",
     lineLinkedTitle: "LINE account linked",
@@ -1141,6 +1153,18 @@ const translations = {
     householdJoining: "กำลังเข้าร่วมครัวเรือน...",
     householdInviteQrAlt: "QR โค้ดคำเชิญ",
     locationPlaceholder: "ตู้กับข้าว / ตู้เย็น / ช่องแช่แข็ง",
+    // Test notification
+    testNotificationTitle: "ทดสอบการแจ้งเตือน",
+    testNotificationHint:
+      "ส่งการแจ้งเตือนหาตัวคุณเองทันทีผ่านทุกช่องทางที่ตั้งค่าไว้ (อีเมล / LINE)",
+    sendTestNotification: "ส่งทดสอบ",
+    sending: "กำลังส่ง…",
+    testNotificationSent: "ส่งการแจ้งเตือนทดสอบแล้ว",
+    testNotificationSentDesc: "ส่งผ่าน {{channels}} — ตรวจสอบอีเมล / LINE ของคุณ",
+    testNotificationFailed: "ส่งการแจ้งเตือนทดสอบไม่สำเร็จ",
+    testNotificationNoChannel: "ยังไม่ได้ตั้งค่าช่องทางแจ้งเตือน",
+    testNotificationNoChannelDesc:
+      "เพิ่มอีเมลในบัญชีหรือเชื่อมต่อ LINE ก่อน แล้วลองใหม่อีกครั้ง",
     // LINE account linking
     lineNotificationsTitle: "การแจ้งเตือนผ่าน LINE",
     lineLinkedTitle: "เชื่อมต่อบัญชี LINE แล้ว",
