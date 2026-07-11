@@ -182,6 +182,33 @@ export type ClassificationResult = {
   };
 };
 
+export type BatchDetectItem = {
+  name_th: string;
+  name_en: string;
+  category: string;
+  estimated_quantity: string;
+  unit: string;
+  confidence: number;
+  /** Server-computed expiry (YYYY-MM-DD); the model never guesses this. */
+  suggested_expiry: string;
+  source_image_index: number;
+};
+
+export type BatchDetectResponse = {
+  items: BatchDetectItem[];
+  image_count: number;
+};
+
+export type LineLinkCodeResponse = {
+  code: string;
+  expires_at: string;
+  expires_in_minutes: number;
+};
+
+export type LineStatusResponse = {
+  linked: boolean;
+};
+
 export type CreateListFromInfoResponse = {
   status: "success" | "failed";
   message: string;
@@ -680,6 +707,23 @@ export const apiClient = {
     return apiRequest<CreateListFromInfoResponse>(API_ENDPOINTS.createRecipeListFromInfo(), {
       method: "POST",
       body,
+    });
+  },
+  batchDetect(formData: FormData) {
+    return apiRequest<BatchDetectResponse>(API_ENDPOINTS.batchDetect(), {
+      method: "POST",
+      body: formData,
+    });
+  },
+  generateLineLinkCode(userid: string) {
+    return apiRequest<LineLinkCodeResponse>(API_ENDPOINTS.lineLinkCode(), {
+      method: "POST",
+      body: { userid },
+    });
+  },
+  getLineStatus(uid: string) {
+    return apiRequest<LineStatusResponse>(API_ENDPOINTS.lineStatus(uid), {
+      method: "GET",
     });
   },
   updateSchedule(uid: string, scheduleKey: string, patch: Record<string, string>) {

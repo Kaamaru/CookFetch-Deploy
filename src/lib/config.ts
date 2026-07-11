@@ -58,6 +58,13 @@ export const API_ENDPOINTS = {
 
   // Classification
   classify: () => `${API_BASE_URL}/classify`,
+
+  // Batch photo detection (Food Inventory)
+  batchDetect: () => `${API_BASE_URL}/batch-detect`,
+
+  // LINE notifications
+  lineLinkCode: () => `${API_BASE_URL}/line/link-code`,
+  lineStatus: (uid: string) => `${API_BASE_URL}/line/status/${uid}`,
   
   // Grocery Lists
   getAllGroceryLists: (uid: string) => `${API_BASE_URL}/grocery/${uid}`,

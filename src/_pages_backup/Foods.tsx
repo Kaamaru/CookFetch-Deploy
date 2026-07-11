@@ -42,6 +42,8 @@ import { normalizeDish } from "@/lib/recipeUtils";
 import { apiClient } from "@/lib/apiClient";
 import { API_DEBUG } from "@/lib/config";
 import ImageClassifier from "@/components/ImageClassifier";
+import BatchScan from "@/components/BatchScan";
+import LineLinkSection from "@/components/LineLinkSection";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 interface UserData {
@@ -160,7 +162,7 @@ const Foods = () => {
   const { demoFoods, setDemoFoods, household } = useGlobalContext();
   const router = useRouter();
   const [tab, setTab] = useState<
-    "ingredients" | "recipes" | "notifications" | "classify"
+    "ingredients" | "recipes" | "notifications" | "classify" | "batch"
   >("ingredients");
   const [inventoryMode, setInventoryMode] = useState<"personal" | "household">("personal");
   const [filterCategory, setFilterCategory] = useState<string>("All");
@@ -204,6 +206,7 @@ const Foods = () => {
     { value: "Unspecified", label: t("foodCategoryUnspecified"), emoji: "❓" },
     { value: "Other", label: t("foodCategoryOther"), emoji: "✨" },
     { value: "Dairy", label: t("foodCategoryDairy"), emoji: "🥛" },
+    { value: "Eggs", label: t("foodCategoryEggs"), emoji: "🥚" },
     { value: "Meat", label: t("foodCategoryMeat"), emoji: "🥩" },
     { value: "Poultry", label: t("foodCategoryPoultry"), emoji: "🍗" },
     { value: "Seafood", label: t("foodCategorySeafood"), emoji: "🐟" },
@@ -227,6 +230,7 @@ const Foods = () => {
   const expiry = {
     Unspecified: 7,
     Dairy: 7,
+    Eggs: 28,
     Meat: 3,
     Poultry: 2,
     Seafood: 1,
@@ -1688,6 +1692,9 @@ const Foods = () => {
                         {/* <SelectItem value="classify">
                           {t("classifyImageTab")}
                         </SelectItem> */}
+                        <SelectItem value="batch">
+                          {t("batchScanTab")}
+                        </SelectItem>
                         <SelectItem value="notifications">
                           {t("notifications")}
                         </SelectItem>
@@ -2203,6 +2210,10 @@ const Foods = () => {
               <div className="mt-4">
                 <ImageClassifier />
               </div>
+            ) : tab === "batch" ? (
+              <div className="mt-4">
+                <BatchScan onAdded={ReloadSchedules} />
+              </div>
             ) : isLoadingNotifications ? (
               <div className="flex flex-col items-center justify-center rounded-2xl border border-red-100 bg-white py-20 animate-fade-in">
                 <div className="relative">
@@ -2217,6 +2228,9 @@ const Foods = () => {
               </div>
             ) : (
               <div className="mt-4">
+                {/* LINE notifications account linking */}
+                <LineLinkSection />
+
                 {notifyError && (
                   <div className="mb-4 text-red-600">{notifyError}</div>
                 )}
