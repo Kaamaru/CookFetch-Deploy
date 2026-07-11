@@ -3,7 +3,8 @@
 import React, { useEffect, useState } from "react";
 import { apiClient, type Person } from "@/lib/apiClient";
 import { useAuth } from "@/contexts/AuthContext";
-import { Users, Plus, Pencil, Trash2, X, Check, ChefHat } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { Users, Plus, Pencil, Trash2, X, Check, ChefHat, AlertTriangle } from "lucide-react";
 
 type PersonFormState = {
     name: string;
@@ -19,6 +20,7 @@ const toCommaSeparated = (value: string[] | undefined): string =>
 
 export const PeopleSection: React.FC = () => {
     const { currentUser } = useAuth();
+    const { t } = useLanguage();
     const [people, setPeople] = useState<Person[]>([]);
     const [isPeopleLoading, setIsPeopleLoading] = useState(false);
     const [peopleError, setPeopleError] = useState<string | null>(null);
@@ -96,22 +98,22 @@ export const PeopleSection: React.FC = () => {
     };
 
     return (
-        <div className="mt-6 border-t pt-6">
+        <div>
             {/* Header */}
             <div className="flex items-center justify-between mb-1">
                 <div className="flex items-center gap-2">
                     <Users className="w-5 h-5 text-red-500" />
-                    <h2 className="text-base font-semibold text-gray-800">People</h2>
+                    <h2 className="text-base font-semibold text-gray-800">{t("peopleTitle")}</h2>
                 </div>
                 <button
                     onClick={() => { setShowAddForm((v) => !v); setEditingPersonId(null); }}
                     className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-red-500 text-white text-sm font-medium hover:bg-red-600 transition-colors"
                 >
                     <Plus className="w-4 h-4" />
-                    Add
+                    {t("add")}
                 </button>
             </div>
-            <p className="text-xs text-gray-400 mb-4">Manage who you're cooking for — preferences and allergies will be passed to the AI assistant.</p>
+            <p className="text-xs text-gray-400 mb-4">{t("peopleManageHint")}</p>
 
             {/* Add Form */}
             {showAddForm && (
@@ -119,38 +121,38 @@ export const PeopleSection: React.FC = () => {
                     onSubmit={handleCreatePerson}
                     className="mb-5 bg-red-50 border border-red-100 rounded-xl p-4 space-y-3"
                 >
-                    <h3 className="text-sm font-semibold text-red-700">New Person</h3>
+                    <h3 className="text-sm font-semibold text-red-700">{t("peopleNewPerson")}</h3>
                     <div>
-                        <label className="block text-xs font-medium text-gray-600 mb-1">Name</label>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">{t("peopleNameLabel")}</label>
                         <input
                             type="text"
                             value={newPerson.name}
                             onChange={(e) => setNewPerson((p) => ({ ...p, name: e.target.value }))}
-                            placeholder="e.g. Aunt Tie"
+                            placeholder={t("peopleNamePlaceholder")}
                             className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-red-300"
                         />
                     </div>
                     <div>
-                        <label className="block text-xs font-medium text-gray-600 mb-1">Preferences</label>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">{t("peoplePreferencesLabel")}</label>
                         <input
                             type="text"
                             value={newPerson.preference}
                             onChange={(e) => setNewPerson((p) => ({ ...p, preference: e.target.value }))}
-                            placeholder="e.g. likes spicy food, no dairy"
+                            placeholder={t("peoplePreferencesPlaceholder")}
                             className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-red-300"
                         />
-                        <p className="text-xs text-gray-400 mt-1">Comma-separated</p>
+                        <p className="text-xs text-gray-400 mt-1">{t("peopleCommaSeparated")}</p>
                     </div>
                     <div>
-                        <label className="block text-xs font-medium text-gray-600 mb-1">Allergies</label>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">{t("peopleAllergiesLabel")}</label>
                         <input
                             type="text"
                             value={newPerson.allergy}
                             onChange={(e) => setNewPerson((p) => ({ ...p, allergy: e.target.value }))}
-                            placeholder="e.g. peanuts, shellfish"
+                            placeholder={t("peopleAllergiesPlaceholder")}
                             className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-red-300"
                         />
-                        <p className="text-xs text-gray-400 mt-1">Comma-separated</p>
+                        <p className="text-xs text-gray-400 mt-1">{t("peopleCommaSeparated")}</p>
                     </div>
                     <div className="flex gap-2 pt-1">
                         <button
@@ -158,14 +160,14 @@ export const PeopleSection: React.FC = () => {
                             disabled={!newPerson.name.trim()}
                             className="flex-1 py-2 rounded-lg bg-red-500 text-white text-sm font-medium hover:bg-red-600 disabled:opacity-40 transition-colors"
                         >
-                            Add Person
+                            {t("peopleAddPerson")}
                         </button>
                         <button
                             type="button"
                             onClick={() => setShowAddForm(false)}
                             className="px-4 py-2 rounded-lg border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 transition-colors"
                         >
-                            Cancel
+                            {t("cancel")}
                         </button>
                     </div>
                 </form>
@@ -180,7 +182,7 @@ export const PeopleSection: React.FC = () => {
             {isPeopleLoading && (
                 <div className="flex items-center gap-2 text-sm text-gray-400 py-4">
                     <span className="w-4 h-4 border-2 border-red-300 border-t-transparent rounded-full animate-spin" />
-                    Loading...
+                    {t("loading")}
                 </div>
             )}
 
@@ -188,8 +190,8 @@ export const PeopleSection: React.FC = () => {
             {!isPeopleLoading && people.length === 0 && !peopleError && (
                 <div className="flex flex-col items-center justify-center py-10 text-center text-gray-400">
                     <ChefHat className="w-10 h-10 mb-3 text-gray-200" />
-                    <p className="text-sm font-medium">No people added yet</p>
-                    <p className="text-xs mt-1">Add family or friends to personalize AI recipe suggestions</p>
+                    <p className="text-sm font-medium">{t("peopleNoneYet")}</p>
+                    <p className="text-xs mt-1">{t("peopleNoneHint")}</p>
                 </div>
             )}
 
@@ -209,21 +211,21 @@ export const PeopleSection: React.FC = () => {
                                             type="text"
                                             value={editPerson.name}
                                             onChange={(e) => setEditPerson((p) => ({ ...p, name: e.target.value }))}
-                                            placeholder="Name"
+                                            placeholder={t("peopleNameLabel")}
                                             className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-red-300"
                                         />
                                         <input
                                             type="text"
                                             value={editPerson.preference}
                                             onChange={(e) => setEditPerson((p) => ({ ...p, preference: e.target.value }))}
-                                            placeholder="Preferences (comma-separated)"
+                                            placeholder={t("peoplePreferencesCommaPlaceholder")}
                                             className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-red-300"
                                         />
                                         <input
                                             type="text"
                                             value={editPerson.allergy}
                                             onChange={(e) => setEditPerson((p) => ({ ...p, allergy: e.target.value }))}
-                                            placeholder="Allergies (comma-separated)"
+                                            placeholder={t("peopleAllergiesCommaPlaceholder")}
                                             className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-red-300"
                                         />
                                         <div className="flex gap-2 pt-1">
@@ -231,13 +233,13 @@ export const PeopleSection: React.FC = () => {
                                                 onClick={() => handleUpdatePerson(person.person_id)}
                                                 className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-red-500 text-white text-sm hover:bg-red-600 transition-colors"
                                             >
-                                                <Check className="w-3.5 h-3.5" /> Save
+                                                <Check className="w-3.5 h-3.5" /> {t("save")}
                                             </button>
                                             <button
                                                 onClick={() => setEditingPersonId(null)}
                                                 className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 transition-colors"
                                             >
-                                                <X className="w-3.5 h-3.5" /> Cancel
+                                                <X className="w-3.5 h-3.5" /> {t("cancel")}
                                             </button>
                                         </div>
                                     </div>
@@ -249,14 +251,14 @@ export const PeopleSection: React.FC = () => {
                                                 <button
                                                     onClick={() => beginEditPerson(person)}
                                                     className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
-                                                    title="Edit"
+                                                    title={t("edit")}
                                                 >
                                                     <Pencil className="w-3.5 h-3.5" />
                                                 </button>
                                                 <button
                                                     onClick={() => handleDeletePerson(person.person_id)}
                                                     className="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"
-                                                    title="Delete"
+                                                    title={t("peopleDelete")}
                                                 >
                                                     <Trash2 className="w-3.5 h-3.5" />
                                                 </button>
@@ -266,7 +268,7 @@ export const PeopleSection: React.FC = () => {
                                         {/* Preference pills */}
                                         {person.preference?.length > 0 && (
                                             <div className="mb-2">
-                                                <span className="text-xs font-medium text-gray-400 uppercase tracking-wide">Preferences</span>
+                                                <span className="text-xs font-medium text-gray-400 uppercase tracking-wide">{t("peoplePreferencesLabel")}</span>
                                                 <div className="flex flex-wrap gap-1 mt-1">
                                                     {person.preference.map((pref, i) => (
                                                         <span key={i} className="px-2 py-0.5 rounded-full bg-green-50 text-green-700 text-xs border border-green-100 font-medium">
@@ -280,18 +282,19 @@ export const PeopleSection: React.FC = () => {
                                         {/* Allergy pills */}
                                         {person.allergy?.length > 0 && (
                                             <div>
-                                                <span className="text-xs font-medium text-gray-400 uppercase tracking-wide">Allergies</span>
+                                                <span className="text-xs font-medium text-gray-400 uppercase tracking-wide">{t("peopleAllergiesLabel")}</span>
                                                 <div className="flex flex-wrap gap-1 mt-1">
                                                     {person.allergy.map((a, i) => (
-                                                        <span key={i} className="px-2 py-0.5 rounded-full bg-red-50 text-red-600 text-xs border border-red-100 font-medium">
-                                                            ⚠ {a}
+                                                        <span key={i} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-50 text-red-600 text-xs border border-red-100 font-medium">
+                                                            <AlertTriangle className="w-3 h-3" />
+                                                            {a}
                                                         </span>
                                                     ))}
                                                 </div>
                                             </div>
                                         )}  
                                         {person.preference?.length === 0 && person.allergy?.length === 0 && (
-                                            <p className="text-xs text-gray-400">No preferences or allergies set</p>
+                                            <p className="text-xs text-gray-400">{t("peopleNoPrefsAllergies")}</p>
                                         )}
                                     </div>
                                 )}

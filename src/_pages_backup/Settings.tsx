@@ -1,9 +1,15 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { BookOpen, ChevronDown } from "lucide-react";
+import {
+  BookOpen,
+  ChevronDown,
+  Settings2,
+  Globe,
+  Lightbulb,
+} from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { apiClient, type Person } from "@/lib/apiClient";
 import { PeopleSection } from "@/components/PeopleSection";
@@ -125,67 +131,67 @@ const SettingsPage: React.FC = () => {
     }
   };
 
+  const langPill = (active: boolean) =>
+    `flex-1 sm:flex-none rounded-full px-5 py-2 text-sm font-semibold transition-all ${
+      active
+        ? "bg-white text-red-600 shadow-sm"
+        : "text-gray-500 hover:text-gray-800"
+    }`;
+
   return (
-    <div className="min-h-screen bg-gray-50 py-10 px-4">
-      <div className="max-w-3xl mx-auto">
-        <h1 className="text-2xl font-semibold mb-4">
-          {t("language")} / {t("settings")}
-        </h1>
+    <div className="min-h-screen bg-gray-50 py-8 sm:py-12 px-4">
+      <div className="max-w-3xl mx-auto space-y-6">
+        {/* Page header */}
+        <header className="flex items-center gap-4">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-red-100 text-red-600">
+            <Settings2 className="h-6 w-6" />
+          </div>
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+              {t("settings")}
+            </h1>
+            <p className="text-sm text-gray-500">{t("settingsSubtitle")}</p>
+          </div>
+        </header>
 
-        <Card>
+        {/* Language */}
+        <Card className="border-gray-200 shadow-sm">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-lg text-gray-900">
+              <Globe className="h-5 w-5 text-red-600" />
+              {t("language")}
+            </CardTitle>
+            <p className="text-sm text-gray-500">
+              {t("switchLanguageDescription")}
+            </p>
+          </CardHeader>
           <CardContent>
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t("language")}
-              </label>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setLanguage("en")}
-                  className={`px-3 py-2 rounded-md border ${
-                    language === "en"
-                      ? "bg-red-500 text-white border-transparent"
-                      : "bg-white text-gray-700"
-                  }`}
-                >
-                  {t("englishLanguage")}
-                </button>
-                <button
-                  onClick={() => setLanguage("th")}
-                  className={`px-3 py-2 rounded-md border ${
-                    language === "th"
-                      ? "bg-red-500 text-white border-transparent"
-                      : "bg-white text-gray-700"
-                  }`}
-                >
-                  {t("thaiLanguage")}
-                </button>
-              </div>
-              <p className="text-xs text-gray-500 mt-2">
-                {t("switchLanguageDescription")}
-              </p>
+            <div className="inline-flex w-full sm:w-auto items-center gap-1 rounded-full bg-gray-100 p-1 shadow-inner">
+              <button onClick={() => setLanguage("en")} className={langPill(language === "en")}>
+                {t("englishLanguage")}
+              </button>
+              <button onClick={() => setLanguage("th")} className={langPill(language === "th")}>
+                {t("thaiLanguage")}
+              </button>
             </div>
-
-            <div className="mt-6">
-              <h2 className="text-sm font-semibold mb-2">
-                {t("otherSettingsPlaceholderTitle")}
-              </h2>
-              <p className="text-sm text-gray-600">
-                {t("otherSettingsPlaceholderDescription")}
-              </p>
-            </div>
-
-            <PeopleSection/>
-
-            <HouseholdSection />
-
           </CardContent>
         </Card>
 
+        {/* People */}
+        <Card className="border-gray-200 shadow-sm">
+          <CardContent className="pt-6">
+            <PeopleSection />
+          </CardContent>
+        </Card>
+
+        {/* Household (renders its own cards) */}
+        <HouseholdSection />
+
         {/* Getting Started Tutorial */}
-        <div className="mt-6">
+        <div>
           <button
             onClick={() => setShowTutorial(!showTutorial)}
-            className="w-full flex items-center justify-between p-4 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-all duration-300"
+            className="w-full flex items-center justify-between p-4 bg-red-50 border border-red-200 rounded-2xl hover:bg-red-100 transition-all duration-300"
           >
             <div className="flex items-center gap-3">
               <BookOpen className="h-5 w-5 text-red-600" />
@@ -265,15 +271,23 @@ const SettingsPage: React.FC = () => {
                   </div>
 
                   {/* Tips Section */}
-                  <div className="bg-white rounded-lg p-4 border border-red-100 mt-6">
-                    <h4 className="font-semibold text-gray-900 mb-3">
+                  <div className="bg-white rounded-xl p-4 border border-red-100 mt-6">
+                    <h4 className="flex items-center gap-2 font-semibold text-gray-900 mb-3">
+                      <Lightbulb className="h-4 w-4 text-amber-500" />
                       {t("proTips")}
                     </h4>
                     <ul className="space-y-2 text-sm text-gray-700">
-                      <li>{t("proTipUseCategories")}</li>
-                      <li>{t("proTipCheckCalendarWeekly")}</li>
-                      <li>{t("proTipAssistantSuggestRecipes")}</li>
-                      <li>{t("proTipEnableNotifications")}</li>
+                      {[
+                        t("proTipUseCategories"),
+                        t("proTipCheckCalendarWeekly"),
+                        t("proTipAssistantSuggestRecipes"),
+                        t("proTipEnableNotifications"),
+                      ].map((tip, i) => (
+                        <li key={i} className="flex items-start gap-2">
+                          <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-red-400" />
+                          <span>{tip}</span>
+                        </li>
+                      ))}
                     </ul>
                   </div>
                 </div>

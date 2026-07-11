@@ -124,22 +124,26 @@ const GroceryItemRow: React.FC<Props> = ({
 
   return (
     <div
-      className={`flex items-center gap-3 p-4 rounded-lg border transition-all ${
+      className={`group flex items-center gap-3 p-4 rounded-xl border transition-all duration-200 ${
         displayChecked
           ? "bg-gray-50 border-gray-200"
-          : "bg-white border-red-100 hover:border-red-300"
-      } ${isMarkedForDelete ? "bg-red-50 border-red-300" : ""} ${pendingChange ? "border-2 border-blue-400" : ""}`}
+          : "bg-white border-red-100 hover:border-red-300 hover:shadow-sm"
+      } ${isMarkedForDelete ? "!bg-red-50 !border-red-300" : ""} ${
+        pendingChange && !isMarkedForDelete
+          ? "ring-2 ring-amber-300 ring-offset-1"
+          : ""
+      }`}
     >
       {/* Checkbox */}
       <Checkbox
         checked={displayChecked}
         onCheckedChange={handleToggleChecked}
-        className="h-5 w-5"
+        className="h-5 w-5 rounded-md border-2 border-gray-300 transition-colors data-[state=checked]:bg-green-500 data-[state=checked]:border-green-500 data-[state=checked]:text-white"
       />
 
       {/* Item Details */}
       <div
-        className={`flex-1 min-w-0 ${displayChecked ? "line-through text-gray-400" : ""} ${isMarkedForDelete ? "opacity-50" : ""}`}
+        className={`flex-1 min-w-0 transition-all ${displayChecked ? "line-through" : ""} ${isMarkedForDelete ? "opacity-50" : ""}`}
       >
         {isEditing ? (
           <div className="space-y-2">
@@ -168,10 +172,20 @@ const GroceryItemRow: React.FC<Props> = ({
         ) : (
           <div
             onClick={() => setIsEditing(true)}
-            className="cursor-pointer hover:bg-red-50 p-2 rounded -m-2"
+            className="cursor-pointer hover:bg-red-50 p-2 rounded-lg -m-2 transition-colors"
           >
-            <p className="font-medium text-gray-800">{item.name}</p>
-            <p className="text-sm text-gray-600">
+            <p
+              className={`font-medium transition-colors ${
+                displayChecked ? "text-gray-400" : "text-gray-800"
+              }`}
+            >
+              {item.name}
+            </p>
+            <p
+              className={`text-sm transition-colors ${
+                displayChecked ? "text-gray-400" : "text-gray-600"
+              }`}
+            >
               {displayQuantity} {getUnitLabel(displayUnit)}
             </p>
           </div>

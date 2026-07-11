@@ -15,6 +15,8 @@ import {
   Shield,
   Scan,
   ShoppingCart,
+  PenLine,
+  ChefHat,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -317,19 +319,19 @@ const Index = () => {
                 step: "1",
                 title: t("addYourFood"),
                 description: t("addYourFoodDesc"),
-                emoji: "📝",
+                icon: PenLine,
               },
               {
                 step: "2",
                 title: t("getReminders"),
                 description: t("getRemindersDesc"),
-                emoji: "🔔",
+                icon: Bell,
               },
               {
                 step: "3",
                 title: t("cookAndEnjoy"),
                 description: t("cookAndEnjoyDesc"),
-                emoji: "👨‍🍳",
+                icon: ChefHat,
               },
             ].map((item, index) => (
               <div
@@ -337,8 +339,8 @@ const Index = () => {
                 className="text-center animate-slide-up"
                 style={{ animationDelay: `${index * 0.2}s` }}
               >
-                <div className="w-16 h-16 bg-gradient-to-br from-red-400 to-red-600 rounded-3xl flex items-center justify-center mx-auto mb-4 text-2xl">
-                  {item.emoji}
+                <div className="w-16 h-16 bg-gradient-to-br from-red-400 to-red-600 rounded-3xl flex items-center justify-center mx-auto mb-4 text-white">
+                  <item.icon className="w-8 h-8" />
                 </div>
                 <div className="w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center mx-auto mb-4 font-bold">
                   {item.step}

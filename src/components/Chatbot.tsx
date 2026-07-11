@@ -1296,7 +1296,7 @@ const Chatbot = () => {
             aria-label={t("closeRecipeAndGoToFoods")}
             className="fixed top-4 right-4 z-50 bg-white rounded-full p-2 shadow hover:bg-gray-100"
           >
-            <span className="text-lg font-semibold">✕</span>
+            <X className="w-5 h-5 text-gray-700" />
           </button>
         )}
       </Card>

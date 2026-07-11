@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { UtensilsCrossed } from "lucide-react";
 import type { Dish } from "@/_pages_backup/actions";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -24,7 +25,8 @@ export default function AssistantRecipeStack({
   gap = "gap-3",
   columns = { sm: 1, md: 2, lg: 2 },
 }: Props) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const dateLocale = language === "th" ? "th-TH" : "en-US";
   const mdCols = columns.md ? `md:grid-cols-${columns.md}` : "";
   const lgCols = columns.lg ? `lg:grid-cols-${columns.lg}` : "";
   const gridClass = `grid ${gap} grid-cols-1 ${mdCols} ${lgCols}`;
@@ -56,7 +58,7 @@ export default function AssistantRecipeStack({
     try {
       const d = new Date(iso);
       if (isNaN(d.getTime())) return "";
-      return d.toLocaleDateString();
+      return d.toLocaleDateString(dateLocale);
     } catch {
       return "";
     }
@@ -99,14 +101,16 @@ export default function AssistantRecipeStack({
                   <img
                     src={dish.image}
                     alt={title}
+                    loading="lazy"
+                    decoding="async"
                     className="w-16 h-16 object-cover rounded-lg"
                     onError={(e) => {
                       (e.target as HTMLImageElement).style.display = "none";
                     }}
                   />
                 ) : (
-                  <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center text-2xl">
-                    🍽️
+                  <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center">
+                    <UtensilsCrossed className="w-7 h-7 text-gray-300" />
                   </div>
                 )}
               </div>

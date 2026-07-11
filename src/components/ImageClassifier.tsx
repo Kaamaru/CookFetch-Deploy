@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Upload, AlertTriangle, CheckCircle, Loader } from "lucide-react";
+import { Upload, AlertTriangle, CheckCircle, Loader, Info } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
@@ -371,7 +371,10 @@ const ImageClassifier: React.FC = () => {
             )}
 
             <div className="space-y-3 p-3 bg-blue-50 border border-blue-200 rounded text-sm text-blue-700">
-              <p>📝 {t("imageExtractedIngredientsInfo")}</p>
+              <p className="flex items-start gap-1.5">
+                <Info className="w-4 h-4 mt-0.5 shrink-0" />
+                {t("imageExtractedIngredientsInfo")}
+              </p>
 
               {!currentUser?.uid ? (
                 <div className="text-red-700 bg-white/80 border border-red-200 rounded p-3">

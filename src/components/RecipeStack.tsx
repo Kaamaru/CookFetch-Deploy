@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
+import { UtensilsCrossed } from "lucide-react";
 import type { Dish } from "@/_pages_backup/actions";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -113,17 +114,18 @@ export default function RecipeStack({
                   <img
                     src={dish.image}
                     alt={title}
+                    loading="lazy"
+                    decoding="async"
                     className="w-full h-32 object-cover rounded-lg"
                     onError={(e) => {
                       (e.target as HTMLImageElement).style.display = "none";
                     }}
                   />
                 ) : (
-                  <div className="w-full h-32 bg-gray-100 rounded-lg flex items-center justify-center text-4xl">
-                    🍽️
+                  <div className="w-full h-32 bg-gray-100 rounded-lg flex items-center justify-center">
+                    <UtensilsCrossed className="w-10 h-10 text-gray-300" />
                   </div>
                 )}
-                <h2>sigma</h2>
               </div>
               <div className="w-full flex items-center justify-between gap-4">
                 <h3 className="text-lg font-semibold text-gray-800 truncate">

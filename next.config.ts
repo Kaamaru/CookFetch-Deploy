@@ -14,10 +14,21 @@ const backendOrigin = process.env.BACKEND_ORIGIN || "https://cookfetch-api.up.ra
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   allowedDevOrigins,
+  poweredByHeader: false,
+  compiler: {
+    // Strip console.* (except error/warn) from production bundles.
+    removeConsole:
+      process.env.NODE_ENV === "production"
+        ? { exclude: ["error", "warn"] }
+        : false,
+  },
   experimental: {
-    optimizePackageImports: ["@radix-ui/*"],
+    // Tree-shake large barrel packages so only used exports ship.
+    optimizePackageImports: ["@radix-ui/*", "lucide-react", "date-fns"],
   },
   images: {
+    // Serve modern, smaller formats when using next/image.
+    formats: ["image/avif", "image/webp"],
     remotePatterns: [
       {
         protocol: "https",

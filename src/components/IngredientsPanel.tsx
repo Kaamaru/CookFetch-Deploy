@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Plus, Calendar, Clock, Trash2, Bell, BellOff } from "lucide-react";
+import { Plus, Calendar, Clock, Trash2, Bell, BellOff, Search, AlertTriangle, type LucideIcon } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -47,7 +47,7 @@ interface Props {
   editingFood: FoodItem | null;
   useCustomDate: boolean;
   setUseCustomDate: (b: boolean) => void;
-  foodCategories: Array<{ value: string; label: string; emoji: string }>;
+  foodCategories: Array<{ value: string; label: string; icon: LucideIcon }>;
   expiry: Record<string, number>;
   handleAddFood: (e: React.FormEvent) => Promise<void>;
   handleEditFood: (e: React.FormEvent) => void;
@@ -58,7 +58,7 @@ interface Props {
   getExpiryStatus: (n: number) => {
     color: string;
     label: string;
-    icon: string;
+    icon: LucideIcon;
   };
   pendingChanges: Record<
     string,
@@ -97,7 +97,8 @@ export default function IngredientsPanel({
   toggleNotification,
   addFoodCooldown,
 }: Props) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const dateLocale = language === "th" ? "th-TH" : "en-US";
   return (
     <div>
       {/* Add Food Form */}
@@ -160,7 +161,10 @@ export default function IngredientsPanel({
                   <SelectContent className="rounded-2xl border-red-200 bg-white shadow-xl">
                     {foodCategories.map((cat) => (
                       <SelectItem key={cat.value} value={cat.value}>
-                        {cat.emoji} {cat.label}
+                        <span className="flex items-center gap-2">
+                          <cat.icon className="w-4 h-4 text-gray-500" />
+                          {cat.label}
+                        </span>
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -198,7 +202,7 @@ export default function IngredientsPanel({
                   onChange={(e) =>
                     setNewFood({ ...newFood, location: e.target.value })
                   }
-                  placeholder="Pantry / Fridge / Freezer"
+                  placeholder={t("locationPlaceholder")}
                   className="rounded-xl border-red-200 focus:border-red-400 focus:ring-red-400"
                 />
               </div>
@@ -329,7 +333,7 @@ export default function IngredientsPanel({
                         {t("expiryOnDate", {
                           date: new Date(
                             newFood.expiryDate,
-                          ).toLocaleDateString(),
+                          ).toLocaleDateString(dateLocale),
                         })}
                       </div>
                     )}
@@ -701,9 +705,10 @@ export default function IngredientsPanel({
 
                 <div className="space-y-3">
                   <Badge
-                    className={`${status.color} px-3 py-1 text-xs font-medium border`}
+                    className={`${status.color} px-3 py-1 text-xs font-medium border inline-flex items-center gap-1`}
                   >
-                    {status.icon} {status.label}
+                    <status.icon className="w-3.5 h-3.5" />
+                    {status.label}
                   </Badge>
 
                   {food.purchaseDate && (
@@ -752,8 +757,9 @@ export default function IngredientsPanel({
                   )}
 
                   {p.isMarkedForDelete && (
-                    <p className="text-xs text-red-700 font-semibold pt-2 border-t border-red-200">
-                      ⚠️ {t("markedForDeletionSaveChanges")}
+                    <p className="text-xs text-red-700 font-semibold pt-2 border-t border-red-200 flex items-center gap-1">
+                      <AlertTriangle className="w-3.5 h-3.5" />
+                      {t("markedForDeletionSaveChanges")}
                     </p>
                   )}
                 </div>
@@ -767,7 +773,7 @@ export default function IngredientsPanel({
       {filteredFoods.length === 0 && (
         <div className="text-center py-12 animate-fade-in">
           <div className="w-16 h-16 bg-red-100 rounded-3xl flex items-center justify-center mx-auto mb-4">
-            <span className="text-2xl">🔍</span>
+            <Search className="w-7 h-7 text-red-500" />
           </div>
           <h3 className="text-xl font-semibold text-gray-900 mb-2">
             {t("noFoodItemsFound")}

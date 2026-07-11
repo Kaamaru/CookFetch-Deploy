@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -10,15 +10,22 @@ import { auth } from "@/lib/firebase";
 import { updateProfile } from "firebase/auth";
 import { apiClient } from "@/lib/apiClient";
 import { useLanguage } from "@/contexts/LanguageContext";
+import PageHeader from "@/components/PageHeader";
+import { UserCircle, Mail } from "lucide-react";
 
 const ProfilePage: React.FC = () => {
   const { currentUser } = useAuth();
   const { toast } = useToast();
   const { t } = useLanguage();
-  const [name, setName] = useState(
-    currentUser?.displayName || "noppanut Khamhang",
-  );
+  const [name, setName] = useState(currentUser?.displayName || "");
   const [loading, setLoading] = useState(false);
+
+  // Sync the field once auth resolves (currentUser is often null on first render).
+  useEffect(() => {
+    if (currentUser?.displayName) {
+      setName(currentUser.displayName);
+    }
+  }, [currentUser?.displayName]);
 
   const handleRename = async () => {
     if (!currentUser) {
@@ -60,48 +67,59 @@ const ProfilePage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-10 px-4">
-      <div className="max-w-3xl mx-auto">
-        <h1 className="text-2xl font-semibold mb-4">{t("profile")}</h1>
+    <div className="min-h-screen bg-gray-50 py-8 sm:py-12 px-4">
+      <div className="max-w-3xl mx-auto space-y-6">
+        <PageHeader
+          icon={UserCircle}
+          title={t("profile")}
+          subtitle={t("displayNameUsageHint")}
+        />
 
-        <Card>
-          <CardContent>
-            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-              <div className="flex-shrink-0">
+        <Card className="border-gray-200 shadow-sm">
+          <CardContent className="pt-6">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-5">
+              <div className="flex-shrink-0 mx-auto sm:mx-0">
                 {currentUser?.photoURL ? (
                   <img
                     src={currentUser.photoURL}
                     alt={t("profileAvatarAlt")}
-                    className="w-20 h-20 rounded-full object-cover"
+                    className="w-24 h-24 rounded-full object-cover ring-4 ring-red-50"
                   />
                 ) : (
-                  <div className="w-20 h-20 rounded-full bg-red-100 flex items-center justify-center text-red-600 font-semibold">
-                    {(name || "?").split(" ")[0]?.charAt(0)?.toUpperCase() ||
-                      "U"}
+                  <div className="w-24 h-24 rounded-full bg-gradient-to-br from-red-400 to-red-600 flex items-center justify-center text-white text-2xl font-bold ring-4 ring-red-50">
+                    {(name.trim() || currentUser?.email || "?")
+                      .charAt(0)
+                      .toUpperCase()}
                   </div>
                 )}
               </div>
 
-              <div className="flex-1">
-                <label className="text-sm text-gray-600">
+              <div className="flex-1 w-full">
+                <label className="text-sm font-medium text-gray-700">
                   {t("displayNameLabel")}
                 </label>
-                <div className="flex gap-2 mt-2">
+                <div className="flex flex-col sm:flex-row gap-2 mt-2">
                   <Input
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="flex-1"
+                    placeholder={t("displayNameLabel")}
+                    className="flex-1 rounded-xl"
                   />
                   <Button
                     onClick={handleRename}
                     disabled={loading || !name.trim()}
+                    className="bg-red-600 hover:bg-red-700 text-white rounded-xl"
                   >
                     {loading ? t("saving") : t("save")}
                   </Button>
                 </div>
-                <p className="text-xs text-gray-500 mt-2">
-                  {t("displayNameUsageHint")}
-                </p>
+
+                {currentUser?.email && (
+                  <p className="mt-3 flex items-center gap-2 text-sm text-gray-500">
+                    <Mail className="w-4 h-4" />
+                    {currentUser.email}
+                  </p>
+                )}
               </div>
             </div>
           </CardContent>

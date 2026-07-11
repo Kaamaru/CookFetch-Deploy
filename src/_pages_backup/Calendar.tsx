@@ -12,7 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ChevronLeft, ChevronRight, Clock } from "lucide-react";
+import { ChevronLeft, ChevronRight, Clock, CalendarDays } from "lucide-react";
 import { useGlobalContext } from "@/contexts/GlobalContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -31,7 +31,10 @@ interface FoodItem {
 
 const Calendar = () => {
   const { currentUser } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  // Explicit locale tied to the app language (not the runtime/browser default),
+  // so server and client render identically and hydration doesn't mismatch.
+  const dateLocale = language === "th" ? "th-TH" : "en-US";
   const router = useRouter();
   const { demoFoods, household } = useGlobalContext();
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -197,7 +200,7 @@ const Calendar = () => {
   const today = new Date();
   const daysInMonth = getDaysInMonth(currentDate);
   const firstDay = getFirstDayOfMonth(currentDate);
-  const monthName = currentDate.toLocaleString("default", {
+  const monthName = currentDate.toLocaleString(dateLocale, {
     month: "long",
     year: "numeric",
   });
@@ -214,8 +217,9 @@ const Calendar = () => {
     <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-red-50">
       {/* Demo Banner */}
       {isDemo && (
-        <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white py-3 px-4 text-center font-semibold">
-          📅 {t("demoModePreview")}{" "}
+        <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white py-3 px-4 text-center font-semibold flex flex-wrap items-center justify-center gap-x-1 gap-y-1">
+          <CalendarDays className="w-4 h-4 shrink-0" />
+          {t("demoModePreview")}{" "}
           <Button
             variant="ghost"
             className="text-white underline ml-2"
@@ -449,7 +453,7 @@ const Calendar = () => {
                                 {item.name}
                               </div>
                               <div className="text-xs opacity-75 mt-1">
-                                {new Date(item.expiryDate).toLocaleDateString()}
+                                {new Date(item.expiryDate).toLocaleDateString(dateLocale)}
                               </div>
                               <div className="text-xs opacity-75">
                                 {calculateDaysUntilExpiry(item.expiryDate) === 0
@@ -495,7 +499,7 @@ const Calendar = () => {
                     currentDate.getFullYear(),
                     currentDate.getMonth(),
                     selectedDay,
-                  ).toLocaleDateString()
+                  ).toLocaleDateString(dateLocale)
                   : "",
               })}
             </DialogTitle>
@@ -526,7 +530,7 @@ const Calendar = () => {
                             <Clock className="w-4 h-4" />
                             <span>
                               {t("expires")}{" "}
-                              {new Date(item.expiryDate).toLocaleDateString()}
+                              {new Date(item.expiryDate).toLocaleDateString(dateLocale)}
                             </span>
                           </div>
                           <div className="text-gray-600">
@@ -538,7 +542,7 @@ const Calendar = () => {
                           {item.purchaseDate && (
                             <div className="text-gray-600">
                               {t("purchaseDateLabel")}{" "}
-                              {new Date(item.purchaseDate).toLocaleDateString()}
+                              {new Date(item.purchaseDate).toLocaleDateString(dateLocale)}
                             </div>
                           )}
                         </div>

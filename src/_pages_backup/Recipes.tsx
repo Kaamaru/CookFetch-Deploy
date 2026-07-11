@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { BookOpen, Camera } from "lucide-react";
+import { BookOpen, Camera, ChefHat } from "lucide-react";
 import { useRouter } from "next/navigation";
 import ImageClassifier from "@/components/ImageClassifier";
 import RecipeSearchPanel from "@/components/RecipeSearchPanel";
@@ -26,10 +26,11 @@ const Recipes: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-amber-50">
+    <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-red-50">
       {isLocked && (
-        <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white py-3 px-4 text-center font-semibold mb-4">
-          🍳 {t("demoModePreview")}{" "}
+        <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white py-3 px-4 text-center font-semibold mb-4 flex flex-wrap items-center justify-center gap-x-1 gap-y-1">
+          <ChefHat className="w-4 h-4 shrink-0" />
+          {t("demoModePreview")}{" "}
           <Button
             variant="ghost"
             className="text-white underline ml-2"

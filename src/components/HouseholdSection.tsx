@@ -329,7 +329,7 @@ export const HouseholdSection = () => {
       {showNoHousehold ? (
         <div className="grid gap-4 md:grid-cols-2">
           <div className="md:col-span-2">
-            <p className="text-sm font-medium text-gray-700">Create or Join Household</p>
+            <p className="text-sm font-medium text-gray-700">{t("householdCreateOrJoin")}</p>
           </div>
 
           <Card>
@@ -459,7 +459,7 @@ export const HouseholdSection = () => {
           <div className="flex flex-col items-center justify-center space-y-6 py-6">
             <div className="rounded-2xl border-4 border-red-50 bg-white p-4 shadow-inner">
               {generatedQrImage ? (
-                <img src={generatedQrImage} alt="Invite QR code" className="block h-[320px] w-[320px]" />
+                <img src={generatedQrImage} alt={t("householdInviteQrAlt")} className="block h-[320px] w-[320px]" />
               ) : (
                 <div className="flex h-[320px] w-[320px] items-center justify-center bg-gray-50 text-sm text-muted-foreground">
                   Generating QR code...
@@ -495,16 +495,16 @@ export const HouseholdSection = () => {
       >
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle className="text-center text-xl">Scan QR Code</DialogTitle>
+            <DialogTitle className="text-center text-xl">{t("householdScanQr")}</DialogTitle>
             <DialogDescription className="text-center">
-              Scan the household invite QR code to join instantly.
+              {t("householdScanQrDesc")}
             </DialogDescription>
           </DialogHeader>
 
           <Tabs value={scanMode} onValueChange={(val) => setScanMode(val as "camera" | "image")} className="w-full">
             <TabsList className="grid w-full grid-cols-2 mb-4">
-              <TabsTrigger value="camera">Use Camera</TabsTrigger>
-              <TabsTrigger value="image">Upload Image</TabsTrigger>
+              <TabsTrigger value="camera">{t("householdUseCamera")}</TabsTrigger>
+              <TabsTrigger value="image">{t("householdUploadImage")}</TabsTrigger>
             </TabsList>
 
             <TabsContent value="camera" className="space-y-4">
@@ -520,7 +520,7 @@ export const HouseholdSection = () => {
                     <div className="rounded-full bg-green-500/20 p-3 border border-green-500 animate-pulse">
                       <QrCode className="h-8 w-8 text-green-400" />
                     </div>
-                    <p className="text-white font-medium text-sm">QR Code Detected</p>
+                    <p className="text-white font-medium text-sm">{t("householdQrDetected")}</p>
                     {scannedCode && (
                       <span className="bg-white/15 text-white text-xs px-2.5 py-1 rounded font-mono tracking-wider">
                         {scannedCode}
@@ -528,7 +528,7 @@ export const HouseholdSection = () => {
                     )}
                     <div className="flex items-center gap-2 text-gray-300 text-xs">
                       <Loader2 className="h-3 w-3 animate-spin text-red-500" />
-                      <span>Joining household...</span>
+                      <span>{t("householdJoining")}</span>
                     </div>
                   </div>
                 ) : !scanError ? (

@@ -398,7 +398,10 @@ const BatchScan: React.FC<Props> = ({ onAdded }) => {
                               <SelectContent>
                                 {FOOD_CATEGORIES.map((c) => (
                                   <SelectItem key={c.value} value={c.value}>
-                                    {c.emoji} {t(c.labelKey)}
+                                    <span className="flex items-center gap-2">
+                                      <c.icon className="w-4 h-4" />
+                                      {t(c.labelKey)}
+                                    </span>
                                   </SelectItem>
                                 ))}
                               </SelectContent>

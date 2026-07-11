@@ -1,12 +1,32 @@
 import type { ReactNode } from "react";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { cookies } from "next/headers";
+import { Inter, Poppins } from "next/font/google";
 import AppProviders from "@/components/AppProviders";
 import {
   getMetadataTranslations,
   normalizeMetadataLanguage,
 } from "@/lib/metadataTranslations";
 import "./globals.css";
+
+// Self-hosted, non-render-blocking fonts (replaces the Google Fonts @import).
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-inter",
+});
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+  variable: "--font-poppins",
+});
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#dc2626",
+};
 
 export async function generateMetadata(): Promise<Metadata> {
   const cookieStore = await cookies();
@@ -70,8 +90,12 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className="bg-white">
+    <html
+      lang="en"
+      className={`${inter.variable} ${poppins.variable}`}
+      suppressHydrationWarning
+    >
+      <body className="bg-white" suppressHydrationWarning>
         <AppProviders>
           <main className="relative z-0 min-h-screen bg-white">{children}</main>
         </AppProviders>

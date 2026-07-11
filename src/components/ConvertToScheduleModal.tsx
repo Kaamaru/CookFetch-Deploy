@@ -254,7 +254,7 @@ const ConvertToScheduleModal: React.FC<Props> = ({
               value={location}
               onChange={(e) => setLocation(e.target.value)}
               disabled={isLoading}
-              placeholder="Pantry / Fridge / Freezer"
+              placeholder={t("locationPlaceholder")}
             />
           </div>
 

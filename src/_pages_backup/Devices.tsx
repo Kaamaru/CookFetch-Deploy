@@ -423,8 +423,9 @@ const Devices = () => {
     <div className="min-h-screen bg-gradient-to-br from-red-50 to-white">
       {/* Demo Banner */}
       {isDemo && (
-        <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white py-3 px-4 text-center font-semibold mb-4">
-          📱 {t("demoModePreview")}{" "}
+        <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white py-3 px-4 text-center font-semibold mb-4 flex flex-wrap items-center justify-center gap-x-1 gap-y-1">
+          <Smartphone className="w-4 h-4 shrink-0" />
+          {t("demoModePreview")}{" "}
           <Button
             variant="ghost"
             className="text-white underline ml-2"

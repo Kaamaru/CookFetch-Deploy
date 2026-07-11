@@ -96,13 +96,13 @@ const GroceryListDetail: React.FC<Props> = ({
         <div className="space-y-2">
           <div className="flex justify-between items-center text-sm">
             <span className="text-gray-600">{t("progress")}</span>
-            <span className="font-semibold text-red-600">
+            <span className="font-semibold text-green-600">
               {Math.round((checkedCount / list.items.length) * 100)}%
             </span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
             <div
-              className="bg-gradient-to-r from-red-400 to-red-700 h-full transition-all duration-300"
+              className="bg-gradient-to-r from-green-400 to-green-600 h-full rounded-full transition-all duration-500 ease-out"
               style={{
                 width: `${(checkedCount / list.items.length) * 100}%`,
               }}

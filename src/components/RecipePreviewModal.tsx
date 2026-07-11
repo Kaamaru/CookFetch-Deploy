@@ -12,6 +12,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { UtensilsCrossed } from "lucide-react";
 
 import { Dish } from "@/_pages_backup/actions";
 import { useRouter } from "next/navigation";
@@ -66,6 +67,8 @@ const RecipePreviewModal: React.FC<Props> = ({
               <img
                 src={dish.image}
                 alt={dish.dishName}
+                loading="lazy"
+                decoding="async"
                 className="w-44 h-32 object-cover rounded-lg shadow-sm"
                 onError={(e) => {
                   // hide broken image and fallback to emoji
@@ -73,8 +76,8 @@ const RecipePreviewModal: React.FC<Props> = ({
                 }}
               />
             ) : (
-              <div className="w-44 h-32 bg-gray-100 rounded-lg flex items-center justify-center text-4xl">
-                🍽️
+              <div className="w-44 h-32 bg-gray-100 rounded-lg flex items-center justify-center">
+                <UtensilsCrossed className="w-10 h-10 text-gray-300" />
               </div>
             )}
           </div>

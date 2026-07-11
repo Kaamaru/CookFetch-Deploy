@@ -32,6 +32,16 @@ import {
   Clock,
   Bell,
   BellOff,
+  Ban,
+  CheckCircle2,
+  Package,
+  UtensilsCrossed,
+  BookOpen,
+  ClipboardList,
+  Camera,
+  ArrowLeft,
+  User,
+  Users,
 } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import { useAuth } from "@/contexts/AuthContext";
@@ -41,6 +51,7 @@ import { useRouter } from "next/navigation";
 import { normalizeDish } from "@/lib/recipeUtils";
 import { apiClient } from "@/lib/apiClient";
 import { API_DEBUG } from "@/lib/config";
+import { getCategoryIcon } from "@/lib/foodCategories";
 import ImageClassifier from "@/components/ImageClassifier";
 import BatchScan from "@/components/BatchScan";
 import LineLinkSection from "@/components/LineLinkSection";
@@ -154,6 +165,7 @@ const Foods = () => {
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
+  const [showAddChooser, setShowAddChooser] = useState(false);
   const [editingFood, setEditingFood] = useState<FoodItem | null>(null);
   const [foods, setFoods] = useState<FoodItem[]>([]);
   const [schedules, setSchedules] = useState<Schedule[]>([]);
@@ -201,31 +213,31 @@ const Foods = () => {
   const [recipeSearchRetryKey, setRecipeSearchRetryKey] = useState(0);
   const recipeSearchAbortRef = useRef<AbortController | null>(null);
 
-  // Sample expiry data - replace with your actual expiry prop
+  // Category list with a lucide icon per category (see lib/foodCategories).
   const FOOD_CATEGORIES = [
-    { value: "Unspecified", label: t("foodCategoryUnspecified"), emoji: "❓" },
-    { value: "Other", label: t("foodCategoryOther"), emoji: "✨" },
-    { value: "Dairy", label: t("foodCategoryDairy"), emoji: "🥛" },
-    { value: "Eggs", label: t("foodCategoryEggs"), emoji: "🥚" },
-    { value: "Meat", label: t("foodCategoryMeat"), emoji: "🥩" },
-    { value: "Poultry", label: t("foodCategoryPoultry"), emoji: "🍗" },
-    { value: "Seafood", label: t("foodCategorySeafood"), emoji: "🐟" },
-    { value: "Vegetables", label: t("foodCategoryVegetables"), emoji: "🥦" },
-    { value: "Fruits", label: t("foodCategoryFruits"), emoji: "🍎" },
-    { value: "Grains", label: t("foodCategoryGrains"), emoji: "🌾" },
-    { value: "Legumes", label: t("foodCategoryLegumes"), emoji: "🫘" },
-    { value: "Nuts", label: t("foodCategoryNuts"), emoji: "🥜" },
-    { value: "Herbs", label: t("foodCategoryHerbs"), emoji: "🌿" },
-    { value: "Condiments", label: t("foodCategoryCondiments"), emoji: "🧂" },
-    { value: "Oils", label: t("foodCategoryOils"), emoji: "🫒" },
-    { value: "Bakery", label: t("foodCategoryBakery"), emoji: "🥖" },
-    { value: "Snacks", label: t("foodCategorySnacks"), emoji: "🍿" },
-    { value: "Beverages", label: t("foodCategoryBeverages"), emoji: "🥤" },
-    { value: "Frozen", label: t("foodCategoryFrozen"), emoji: "❄️" },
-    { value: "Canned", label: t("foodCategoryCanned"), emoji: "🥫" },
-    { value: "ReadyToEat", label: t("foodCategoryReadyToEat"), emoji: "🍱" },
-    { value: "Desserts", label: t("foodCategoryDesserts"), emoji: "🍰" },
-  ];
+    { value: "Unspecified", label: t("foodCategoryUnspecified") },
+    { value: "Other", label: t("foodCategoryOther") },
+    { value: "Dairy", label: t("foodCategoryDairy") },
+    { value: "Eggs", label: t("foodCategoryEggs") },
+    { value: "Meat", label: t("foodCategoryMeat") },
+    { value: "Poultry", label: t("foodCategoryPoultry") },
+    { value: "Seafood", label: t("foodCategorySeafood") },
+    { value: "Vegetables", label: t("foodCategoryVegetables") },
+    { value: "Fruits", label: t("foodCategoryFruits") },
+    { value: "Grains", label: t("foodCategoryGrains") },
+    { value: "Legumes", label: t("foodCategoryLegumes") },
+    { value: "Nuts", label: t("foodCategoryNuts") },
+    { value: "Herbs", label: t("foodCategoryHerbs") },
+    { value: "Condiments", label: t("foodCategoryCondiments") },
+    { value: "Oils", label: t("foodCategoryOils") },
+    { value: "Bakery", label: t("foodCategoryBakery") },
+    { value: "Snacks", label: t("foodCategorySnacks") },
+    { value: "Beverages", label: t("foodCategoryBeverages") },
+    { value: "Frozen", label: t("foodCategoryFrozen") },
+    { value: "Canned", label: t("foodCategoryCanned") },
+    { value: "ReadyToEat", label: t("foodCategoryReadyToEat") },
+    { value: "Desserts", label: t("foodCategoryDesserts") },
+  ].map((c) => ({ ...c, icon: getCategoryIcon(c.value) }));
 
   const expiry = {
     Unspecified: 7,
@@ -677,25 +689,25 @@ const Foods = () => {
       return {
         color: "bg-red-100 text-red-800 border-red-200",
         label: "Expired",
-        icon: "🚫",
+        icon: Ban,
       };
     } else if (daysUntilExpiry <= 2) {
       return {
         color: "bg-red-100 text-red-700 border-red-200",
         label: "Expires Soon",
-        icon: "⚠️",
+        icon: AlertTriangle,
       };
     } else if (daysUntilExpiry <= 7) {
       return {
         color: "bg-yellow-100 text-yellow-800 border-yellow-200",
         label: "Expires This Week",
-        icon: "⏰",
+        icon: Clock,
       };
     } else {
       return {
         color: "bg-green-100 text-green-800 border-green-200",
         label: "Fresh",
-        icon: "✅",
+        icon: CheckCircle2,
       };
     }
   };
@@ -1535,8 +1547,9 @@ const Foods = () => {
     <div className="min-h-screen bg-white">
       {/* Demo Banner */}
       {isDemo && (
-        <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white py-3 px-4 text-center font-semibold">
-          📋 Demo Mode - Preview what you can do when logged in.{" "}
+        <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white py-3 px-4 text-center font-semibold flex flex-wrap items-center justify-center gap-x-1 gap-y-1">
+          <ClipboardList className="w-4 h-4 shrink-0" />
+          Demo Mode - Preview what you can do when logged in.{" "}
           <Button
             variant="ghost"
             className="text-white underline ml-2"
@@ -1551,54 +1564,45 @@ const Foods = () => {
           <div className="max-w-6xl mx-auto">
             {/* Header */}
             <div className="mb-8 animate-fade-in">
-              <div className="flex items-center justify-between mb-2">
+              <div className="flex flex-wrap items-center justify-between gap-3 mb-2">
                 {/* <JsonDropdown expiry={expiry} /> */}
                 {household ? (
-                  <Select
-                    value={inventoryMode}
-                    onValueChange={(v: "personal" | "household") => setInventoryMode(v)}
+                  <div
+                    role="tablist"
+                    aria-label={t("inventorySwitcherLabel")}
+                    className="inline-flex items-center gap-1 rounded-full bg-gray-100 p-1 max-w-full shadow-inner"
                   >
-                    <SelectTrigger className="group flex items-center gap-3 px-3 sm:px-4 py-4 sm:py-4 rounded-xl w-full max-w-[280px] sm:max-w-xs bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all cursor-pointer [&>svg]:hidden">
-                      <div className="flex flex-col text-left min-w-0">
-                        <span className="text-xs text-gray-500 leading-none mb-0.5">
-                          {inventoryMode === "personal" ? "Personal" : "Shared"}
-                        </span>
-                        <span className="text-lg sm:text-xl font-bold text-gray-900 leading-tight truncate">
-                          {inventoryMode === "personal" ? t("myInventory") : household.name}
-                        </span>
-                      </div>
-                      <svg
-                        className="ml-auto w-4 h-4 text-gray-400 group-hover:text-gray-600 transition-colors shrink-0"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        viewBox="0 0 24 24"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 9l6 6 6-6" />
-                      </svg>
-                    </SelectTrigger>
-
-                    <SelectContent className="rounded-xl border border-gray-200 shadow-lg p-1.5 animate-in fade-in zoom-in-95 min-w-[220px]">
-                      <SelectItem
-                        value="personal"
-                        className="rounded-lg px-3 py-2.5 cursor-pointer focus:bg-gray-100 data-[state=checked]:bg-blue-50"
-                      >
-                        <div className="flex flex-col text-left">
-                          <span className="font-medium text-gray-900 text-sm">{t("myInventory")}</span>
-                          <span className="text-xs text-gray-500">Your private items</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem
-                        value="household"
-                        className="rounded-lg px-3 py-2.5 cursor-pointer focus:bg-gray-100 data-[state=checked]:bg-blue-50"
-                      >
-                        <div className="flex flex-col text-left">
-                          <span className="font-medium text-gray-900 text-sm">{household.name}</span>
-                          <span className="text-xs text-gray-500">Shared household inventory</span>
-                        </div>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
+                    <button
+                      type="button"
+                      role="tab"
+                      aria-selected={inventoryMode === "personal"}
+                      onClick={() => setInventoryMode("personal")}
+                      className={`flex items-center gap-1.5 rounded-full px-3.5 sm:px-5 py-2 text-sm font-semibold transition-all min-w-0 ${
+                        inventoryMode === "personal"
+                          ? "bg-white text-red-600 shadow-sm"
+                          : "text-gray-500 hover:text-gray-800"
+                      }`}
+                    >
+                      <User className="w-4 h-4 shrink-0" />
+                      <span className="truncate">{t("myInventory")}</span>
+                    </button>
+                    <button
+                      type="button"
+                      role="tab"
+                      aria-selected={inventoryMode === "household"}
+                      onClick={() => setInventoryMode("household")}
+                      className={`flex items-center gap-1.5 rounded-full px-3.5 sm:px-5 py-2 text-sm font-semibold transition-all min-w-0 ${
+                        inventoryMode === "household"
+                          ? "bg-white text-red-600 shadow-sm"
+                          : "text-gray-500 hover:text-gray-800"
+                      }`}
+                    >
+                      <Users className="w-4 h-4 shrink-0" />
+                      <span className="truncate max-w-[110px] sm:max-w-[180px]">
+                        {household.name}
+                      </span>
+                    </button>
+                  </div>
                 ) : (
                   <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
                     {t("myFoodInventory")}
@@ -1626,8 +1630,8 @@ const Foods = () => {
                 <Card className="border-red-200">
                   <CardContent className="p-4">
                     <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 bg-blue-100 rounded-2xl flex items-center justify-center">
-                        <span className="text-lg">📦</span>
+                      <div className="w-10 h-10 bg-gray-100 rounded-2xl flex items-center justify-center">
+                        <Package className="w-5 h-5 text-gray-600" />
                       </div>
                       <div>
                         <p className="text-2xl font-bold text-gray-900">
@@ -1663,7 +1667,7 @@ const Foods = () => {
                   <CardContent className="p-4">
                     <div className="flex items-center space-x-3">
                       <div className="w-10 h-10 bg-red-100 rounded-2xl flex items-center justify-center">
-                        <span className="text-lg">🚫</span>
+                        <Ban className="w-5 h-5 text-red-600" />
                       </div>
                       <div>
                         <p className="text-2xl font-bold text-red-600">
@@ -1678,9 +1682,18 @@ const Foods = () => {
                 {/* View dropdown (Inventory, Recipes, Notifications) */}
                 <div className="flex items-center justify-end">
                   <div className="bg-white p-2 rounded-full shadow-sm inline-flex w-56">
-                    <Select value={tab} onValueChange={(v) => setTab(v as any)}>
+                    <Select
+                      value={tab === "batch" ? "" : tab}
+                      onValueChange={(v) => setTab(v as any)}
+                    >
                       <SelectTrigger className="w-full">
-                        <SelectValue placeholder={t("selectViewPlaceholder")} />
+                        <SelectValue
+                          placeholder={
+                            tab === "batch"
+                              ? t("batchScanTab")
+                              : t("selectViewPlaceholder")
+                          }
+                        />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="ingredients">
@@ -1692,9 +1705,6 @@ const Foods = () => {
                         {/* <SelectItem value="classify">
                           {t("classifyImageTab")}
                         </SelectItem> */}
-                        <SelectItem value="batch">
-                          {t("batchScanTab")}
-                        </SelectItem>
                         <SelectItem value="notifications">
                           {t("notifications")}
                         </SelectItem>
@@ -1728,7 +1738,7 @@ const Foods = () => {
                     />
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   {/* Bulk Actions */}
                   {(() => {
                     const allMarkedForDelete = sortedFoods.every(
@@ -1800,16 +1810,69 @@ const Foods = () => {
                 </div>
                 <Button
                   onClick={() => {
-                    setShowAddForm(!showAddForm);
                     setEditingFood(null);
+                    if (showAddForm) {
+                      setShowAddForm(false);
+                    } else {
+                      setShowAddChooser(true);
+                    }
                   }}
-                  className="bg-red-500 hover:bg-red-700 text-white rounded-xl px-6 py-3 font-semibold"
+                  className="bg-red-500 hover:bg-red-700 text-white rounded-xl px-6 py-3 font-semibold w-full sm:w-auto"
                 >
                   <Plus className="h-4 w-4 mr-2" />
-                  {t("addFood")}
+                  {showAddForm ? t("closeAddForm") : t("addFood")}
                 </Button>
               </div>
             )}
+
+            {/* Add-food method chooser */}
+            <Dialog open={showAddChooser} onOpenChange={setShowAddChooser}>
+              <DialogContent className="sm:max-w-[440px]">
+                <DialogHeader>
+                  <DialogTitle>{t("addFoodChooserTitle")}</DialogTitle>
+                </DialogHeader>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 py-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowAddChooser(false);
+                      setShowAddForm(true);
+                    }}
+                    className="flex flex-col items-center gap-2 rounded-2xl border border-gray-200 p-5 text-center transition hover:border-red-300 hover:bg-red-50"
+                  >
+                    <span className="flex h-12 w-12 items-center justify-center rounded-full bg-red-100 text-red-600">
+                      <ClipboardList className="h-6 w-6" />
+                    </span>
+                    <span className="font-semibold text-gray-900">
+                      {t("addByForm")}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      {t("addByFormDesc")}
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowAddChooser(false);
+                      setShowAddForm(false);
+                      setTab("batch");
+                    }}
+                    className="flex flex-col items-center gap-2 rounded-2xl border border-gray-200 p-5 text-center transition hover:border-red-300 hover:bg-red-50"
+                  >
+                    <span className="flex h-12 w-12 items-center justify-center rounded-full bg-red-100 text-red-600">
+                      <Camera className="h-6 w-6" />
+                    </span>
+                    <span className="font-semibold text-gray-900">
+                      {t("addByPhoto")}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      {t("addByPhotoDesc")}
+                    </span>
+                  </button>
+                </div>
+              </DialogContent>
+            </Dialog>
 
             {/* Filter Dialog */}
             <Dialog
@@ -2019,7 +2082,7 @@ const Foods = () => {
                   <div className="relative">
                     <div className="w-16 h-16 border-4 border-red-200 border-t-red-600 rounded-full animate-spin"></div>
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="text-2xl">🍽️</span>
+                      <UtensilsCrossed className="w-6 h-6 text-red-600" />
                     </div>
                   </div>
                   <p className="mt-6 text-gray-600 font-medium">
@@ -2059,7 +2122,7 @@ const Foods = () => {
                   <div className="relative">
                     <div className="w-16 h-16 border-4 border-red-200 border-t-red-600 rounded-full animate-spin"></div>
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="text-2xl">📖</span>
+                      <BookOpen className="w-6 h-6 text-red-600" />
                     </div>
                   </div>
                   <p className="mt-6 text-gray-600 font-medium">
@@ -2211,7 +2274,15 @@ const Foods = () => {
                 <ImageClassifier />
               </div>
             ) : tab === "batch" ? (
-              <div className="mt-4">
+              <div className="mt-4 space-y-3">
+                <button
+                  type="button"
+                  onClick={() => setTab("ingredients")}
+                  className="inline-flex items-center gap-1 text-sm text-red-600 hover:text-red-700"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  {t("backToInventory")}
+                </button>
                 <BatchScan onAdded={ReloadSchedules} />
               </div>
             ) : isLoadingNotifications ? (
@@ -2219,7 +2290,7 @@ const Foods = () => {
                 <div className="relative">
                   <div className="w-16 h-16 border-4 border-red-200 border-t-red-600 rounded-full animate-spin"></div>
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-2xl">🔔</span>
+                    <Bell className="w-6 h-6 text-red-600" />
                   </div>
                 </div>
                 <p className="mt-6 text-gray-600 font-medium">
