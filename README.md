@@ -4,8 +4,6 @@ A smart kitchen and household management app that helps people reduce food waste
 
 **Live demo:** https://cookfetch.kaamaru.com/
 
-![CookFetch Hero](public/media/hero_red.png)
-
 ## Overview
 
 CookFetch is built around everyday kitchen workflows: what's in the fridge, what needs to be used soon, what to cook next, and how to plan shopping without waste.
@@ -22,11 +20,6 @@ CookFetch is built around everyday kitchen workflows: what's in the fridge, what
 - Barcode/scan-based food handling support
 - Responsive UI for desktop and mobile
 
-## Screenshots
-
-| Dashboard | Kitchen Assistant | Shopping List |
-|-----------|-------------------|---------------|
-| ![Dashboard](public/media/dashboard.png) | ![Kitchen Assistant](public/media/assistant.png) | ![Shopping List](public/media/shopping.jpg) |
 
 ## Tech Stack
 
